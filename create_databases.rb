@@ -13,9 +13,10 @@ SQLite3::Database.new(database) do |db|
 		Power INTEGER,
 		Toughness INTEGER,
 		Loyalty INTEGER,
+		Cmc INTEGER,
 		
 		CONSTRAINT Unique_Card
-		UNIQUE (Name, Power, Toughness, Loyalty)
+		UNIQUE (Name, Power, Toughness, Loyalty, Cmc)
 	);
 	")
 	
@@ -253,28 +254,14 @@ SQLite3::Database.new(database) do |db|
 		UNIQUE (CardId, RarityId, SetId)
 	);	
 	")
-	
-	# Create the ManaInfo table
-	db.execute("CREATE TABLE IF NOT EXISTS ManaInfo(
-		Id INTEGER PRIMARY KEY ASC,
-		CardId INTEGER NOT NULL,
-		Cmc INTEGER,
-		
-		FOREIGN KEY(CardId) REFERENCES Card(Id),
-		
-		CONSTRAINT Unique_ManaInfo	UNIQUE (CardId)
-	);	
-	")
 		
 	# Create the ManaInfoCost table
 	db.execute("CREATE TABLE IF NOT EXISTS ManaInfoCost(
 		Id INTEGER PRIMARY KEY ASC,
 		CardId INTEGER NOT NULL,
-		ManaInfoId INTEGER NOT NULL,
 		ColorId INTEGER NOT NULL,
 		
 		FOREIGN KEY(CardId) REFERENCES Card(Id),
-		FOREIGN KEY(ManaInfoId) REFERENCES ManaInfo(Id),
 		FOREIGN KEY(ColorId) REFERENCES Color(Id)
 	);	
 	")
@@ -283,14 +270,12 @@ SQLite3::Database.new(database) do |db|
 	db.execute("CREATE TABLE IF NOT EXISTS ManaInfoColorIdentity(
 		Id INTEGER PRIMARY KEY ASC,
 		CardId INTEGER NOT NULL,
-		ManaInfoId INTEGER NOT NULL,
 		ColorId INTEGER NOT NULL,
 		
 		FOREIGN KEY(CardId) REFERENCES Card(Id),
-		FOREIGN KEY(ManaInfoId) REFERENCES ManaInfo(Id),
 		FOREIGN KEY(ColorId) REFERENCES Color(Id)
 		
-		CONSTRAINT Unique_ManaInfoColorIdentity UNIQUE (CardId, ManaInfoId, ColorId)
+		CONSTRAINT Unique_ManaInfoColorIdentity UNIQUE (CardId, ColorId)
 	);	
 	")
 		
@@ -352,7 +337,5 @@ SQLite3::Database.new(database) do |db|
 		CONSTRAINT Unique_TypeInfoType UNIQUE (CardId, TypeInfoId, TypeId)
 	);	
 	")
-
-	
 end
 
