@@ -4,7 +4,7 @@ require 'zip'
 require 'JSON'
 
 database = 'Mtg.db'
-all_sets_URL = 'https://mtgjson.com/json/AllSets-x.json.zip'
+all_sets_url = 'https://mtgjson.com/json/AllSets-x.json.zip'
 zip_name = 'jsonzip.zip'
 json_filename = 'AllSets-x.json'
 
@@ -19,7 +19,7 @@ def get_zipfile(all_sets_url, zip_name)
 	# Write the file to the disk
 	File.open(zip_name, "wb") do |f|
 		f.binmode
-		f.write inputStream.parsed_response
+		f.write input_stream.parsed_response
 	end
 end
 
@@ -44,6 +44,8 @@ end
 # RETURNS: the id of the value inserted
 ########################################################################
 def insert_value_into_database(database, table, column, value)
+	
+
 	database.execute("
 		INSERT OR IGNORE INTO " + table + "
 			("+ column +")
@@ -62,32 +64,36 @@ end
 ########################################################################
 # Parse the json object and build the database
 ########################################################################
-SQLite3::Database.new(database) do |db|
-	json = get_json_object zip_name, json_filename
-	json.each do |set|
-		# Get the set info
-		set_info_index = 1
-		set_info = set[set_info_index]
-	
-		######### PS
-		# 1: Set the set data
-		# 2: Check to see if it exists in the database
-		# 	2a: If not, create it and all associated info
-		#	2b: If so, then load the ids from the db
+def Main(database, zip_name, json_filename)
+	SQLite3::Database.new(database) do |db|
+		json = get_json_object zip_name, json_filename
+		json.each do |set|
+			# Get the set info
+			set_info_index = 1
+			set_info = set[set_info_index]
 		
-		# Set the data 
-		set_name = set_info['name'].to_s
-		set_code = set_info['code'].to_s
-		set_release_date = set_info['releaseDate'].to_s
-		set_online_only = set_info['onlineOnly'].to_s
-				
-		# Set the ids or create them if they do not exist
-		set_border_id = insert_value_into_database(db, 'Border', 'BorderType', set_info['border'])
-	#	set_type_id
-	#	set_block_id
-		
-	#	set_id
-		
+			######### Pseudocode
+			# 1: Set the set data
+			# 2: Check to see if it exists in the database
+			# 	2a: If not, create it and all associated info
+			#	2b: If so, then load the ids from the db
+			
+			# Set the data 
+			set_name = set_info['name'].to_s
+			set_code = set_info['code'].to_s
+			set_release_date = set_info['releaseDate'].to_s
+			set_online_only = set_info['onlineOnly'].to_s
+					
+			# Set the ids or create them if they do not exist
+			set_border_id = insert_value_into_database(db, 'Border', 'BorderType', set_info['border'])
+			set_type_id = insert_value_into_database(db, 'SetType', 'SetType', set_info['type'])
+			set_block_id = insert_value_into_database(db, 'Block', 'BlockName', set_info['block'])
+			
+			# set_id
+			
+		end
 	end
-end
-
+end	
+	
+# Main program
+Main(database, zip_name, json_filename)
