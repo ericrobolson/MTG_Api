@@ -148,10 +148,8 @@ SQLite3::Database.new(database) do |db|
 		ReleaseDate DATE NOT NULL,
 		BorderId INTEGER,
 		SetTypeId INTEGER,
-		BlockId INTEGER NOT NULL,
+		BlockId INTEGER,
 		OnlineOnly BIT,
-		
-		FOREIGN KEY(BlockId) REFERENCES Block(Id),		
 		
 		CONSTRAINT Unique_MtgSetName UNIQUE (Name),
 		CONSTRAINT Unique_MtgSetCode UNIQUE (Code)

@@ -44,15 +44,22 @@ end
 # RETURNS: the id of the value inserted
 ########################################################################
 def insert_value_into_database(database, table, column, value)
+	id = database.execute("
+			SELECT Id FROM " + table + "
+			WHERE " + column + " = ? ", value)[0]
 	
-
-	database.execute("
-		INSERT OR IGNORE INTO " + table + "
+	if (id.nil?)
+		if (value.nil?)
+			return nil
+		end
+	
+		database.execute("
+		INSERT INTO " + table + "
 			("+ column +")
 		VALUES
 			(?)
-	", value)
-	
+		", value)
+	end 
 	id = database.execute("
 			SELECT Id FROM " + table + "
 			WHERE " + column + " = ? ", value)[0]
@@ -62,22 +69,81 @@ end
 
 
 ########################################################################
+# Insert the set with the specified values into the database
+#	database: the database connection to use
+# RETURNS: the id of the set created or found
+########################################################################
+def insert_set(database, set_name, set_code, set_release_date, set_online_only, set_border_id, set_type_id, set_block_id)
+	# Grab the set_id that fits the data
+	set_id = db.execute("SELECT Id FROM MtgSet WHERE
+		Name = ? AND 
+		Code = ? AND 
+		ReleaseDate = ?",
+		[
+			set_name, 
+			set_code, 
+			set_release_date, 
+		])[0]
+	
+	if (set_id.nil?)
+		# Insert the data into the database
+		db.execute("INSERT OR IGNORE INTO MtgSet 
+		(
+			Name, 
+			Code, 
+			ReleaseDate, 
+			OnlineOnly, 
+			BorderId, 
+			SetTypeId,
+			BlockId) 
+		VALUES (?,?,?,?,?,?,?)", 
+		[
+			set_name, 
+			set_code, 
+			set_release_date, 
+			set_online_only, 
+			set_border_id, 
+			set_type_id, 
+			set_block_id
+		])
+	end
+	
+	# Grab the set_id that fits the data
+	set_id = db.execute("SELECT Id FROM MtgSet WHERE
+		Name = ? AND 
+		Code = ? AND 
+		ReleaseDate = ?",
+		[
+			set_name, 
+			set_code, 
+			set_release_date
+		]
+	)[0]
+	
+	puts set_name + ': ' + set_id.to_s
+	puts '-- ' + set_code.to_s
+	puts '-- ' + set_release_date.to_s
+	puts '-- ' + set_online_only.to_s
+	puts '-- ' + set_border_id.to_s
+	puts '-- ' + set_type_id.to_s
+	puts '-- ' + set_block_id.to_s
+end
+
+########################################################################
 # Parse the json object and build the database
 ########################################################################
 def Main(database, zip_name, json_filename)
+	
+
 	SQLite3::Database.new(database) do |db|
 		json = get_json_object zip_name, json_filename
+		
+		# Iterate through each set
 		json.each do |set|
 			# Get the set info
 			set_info_index = 1
 			set_info = set[set_info_index]
 		
-			######### Pseudocode
-			# 1: Set the set data
-			# 2: Check to see if it exists in the database
-			# 	2a: If not, create it and all associated info
-			#	2b: If so, then load the ids from the db
-			
 			# Set the data 
 			set_name = set_info['name'].to_s
 			set_code = set_info['code'].to_s
@@ -89,11 +155,17 @@ def Main(database, zip_name, json_filename)
 			set_type_id = insert_value_into_database(db, 'SetType', 'SetType', set_info['type'])
 			set_block_id = insert_value_into_database(db, 'Block', 'BlockName', set_info['block'])
 			
-			# set_id
+			# Get the set id or insert it if it doesn't exist
+			set_id = insert_set(db, set_name, set_code, set_release_date, set_online_only, set_border_id, set_type_id, set_block_id)
+			
+			#
+			# Go through and create each card
+			#
 			
 		end
 	end
 end	
 	
 # Main program
+#get_zipfile(all_sets_url, zip_name) # Don't need to run this every time
 Main(database, zip_name, json_filename)
