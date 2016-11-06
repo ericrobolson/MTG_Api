@@ -73,7 +73,7 @@ end
 #	database: the database connection to use
 # RETURNS: the id of the set created or found
 ########################################################################
-def insert_set(database, set_name, set_code, set_release_date, set_online_only, set_border_id, set_type_id, set_block_id)
+def insert_set(db, set_name, set_code, set_release_date, set_online_only, set_border_id, set_type_id, set_block_id)
 	# Grab the set_id that fits the data
 	set_id = db.execute("SELECT Id FROM MtgSet WHERE
 		Name = ? AND 
@@ -129,6 +129,56 @@ def insert_set(database, set_name, set_code, set_release_date, set_online_only, 
 	puts '-- ' + set_block_id.to_s
 end
 
+
+########################################################################
+# Insert the card with the specified values into the database
+#	database: the database connection to use
+# RETURNS: the id of the created or found
+########################################################################
+def insert_card(db, card, set_id)
+	card_name = card['name']
+	card_power = card['power']
+	card_toughness = card['toughness']
+	card_loyalty = card['loyalty']
+	card_cmc = card['cmc']
+	
+	# Grab the card_id that fits the data
+	card_id = db.execute("SELECT Id FROM Card WHERE
+		Name = ?",
+		[card_name])[0]
+	
+	if (card_id.nil?)
+		# Insert the data into the database
+		db.execute("INSERT OR IGNORE INTO Card 
+		(
+			Name, 
+			Power,
+			Toughness,
+			Loyalty,
+			Cmc
+		) 
+		VALUES (?,?,?,?,?)", 
+		[
+			card_name,
+			card_power,
+			card_toughness,
+			card_loyalty,
+			card_cmc
+		])
+	end
+	
+	# Grab the card_id that fits the data
+	card_id = db.execute("SELECT Id FROM Card WHERE
+		Name = ?",
+		[card_name])[0]
+	
+	
+	puts card_name + ': ' + card_id.to_s
+	
+	return card_id
+end
+
+
 ########################################################################
 # Parse the json object and build the database
 ########################################################################
@@ -158,10 +208,13 @@ def Main(database, zip_name, json_filename)
 			# Get the set id or insert it if it doesn't exist
 			set_id = insert_set(db, set_name, set_code, set_release_date, set_online_only, set_border_id, set_type_id, set_block_id)
 			
-			#
-			# Go through and create each card
-			#
-			
+			# Go through and create each card		
+			set_info['cards'].each do |card|
+				# Get tje card id
+				card_id = insert_card(db, card, set_id)
+				
+				
+			end
 		end
 	end
 end	

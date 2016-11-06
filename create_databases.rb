@@ -10,8 +10,8 @@ SQLite3::Database.new(database) do |db|
 	db.execute("CREATE TABLE IF NOT EXISTS Card(
 		Id INTEGER PRIMARY KEY ASC,
 		Name TEXT NOT NULL,
-		Power INTEGER,
-		Toughness INTEGER,
+		Power TEXT,
+		Toughness TEXT,
 		Loyalty INTEGER,
 		Cmc INTEGER,
 		
