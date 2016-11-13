@@ -175,6 +175,32 @@ def insert_card(db, card, set_id)
 	
 	puts card_name + ': ' + card_id.to_s
 	
+	# 
+	card.each do |item|
+		puts item
+		
+		## XXXXXXXXXXXXXXXXXXXXXXXXXX
+		## Todo list 
+		##
+		## Create the RarityInfo
+		##		Create/update the Rarity table
+		## Create the ArtistInfo
+		##		Create/update the artist table
+		## Create the LegalityInfo
+		##		Create/update the Legality table
+		## Create the TypeInfo
+		##		Create/update the Type table
+		##		Create all linking tables
+		## Create the SetInfo
+		## Create the LayoutInfo 
+		##		Create/update the Layout table
+		## Create the ManaInfo
+		##		Create/update the Color table
+		##		Create all linking tables
+		
+		
+	end
+	
 	return card_id
 end
 
@@ -210,9 +236,11 @@ def Main(database, zip_name, json_filename)
 			
 			# Go through and create each card		
 			set_info['cards'].each do |card|
-				# Get tje card id
+				# Get the card id
 				card_id = insert_card(db, card, set_id)
 				
+				# XXXX 
+				# Go through and create the NamesInfo
 				
 			end
 		end
